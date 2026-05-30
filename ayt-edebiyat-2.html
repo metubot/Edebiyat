@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AYT Edebiyat Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #fdf8f2 0%, #f5ece0 40%, #ede0cc 100%);
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #5c3d1e;
+  }
+  .app { display: flex; flex-direction: column; align-items: center; padding: 24px 16px 60px; }
+  .wrap { max-width: 760px; width: 100%; }
+  .center { text-align: center; }
+  h1 { font-size: clamp(1.8rem,5vw,3rem); color: #3d2b1f; margin-bottom: 4px; }
+  .subtitle { color: #8b6914; font-size: 0.85rem; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 32px; }
+  .card {
+    background: rgba(255,252,248,0.97);
+    border: 1px solid #d9c9b0;
+    border-radius: 20px;
+    padding: 28px 24px;
+    box-shadow: 0 8px 40px rgba(139,105,20,0.09), 0 2px 8px rgba(139,105,20,0.06);
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 22px; }
+  .mini-card {
+    background: #f0e8da;
+    border: 1px solid #d9c9b0;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.88rem; color: #8b6444;
+  }
+  .btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  .btn-gold {
+    background: linear-gradient(135deg, #c4962e, #8b6914);
+    border: none; border-radius: 12px;
+    padding: 13px 28px; color: #fffdf9;
+    font-size: 1rem; cursor: pointer;
+    font-family: Georgia, serif; font-weight: bold;
+    letter-spacing: 0.04em;
+    box-shadow: 0 4px 16px rgba(139,105,20,0.25);
+    transition: opacity 0.15s;
+  }
+  .btn-gold:hover { opacity: 0.88; }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid #d9c9b0; border-radius: 12px;
+    padding: 13px 28px; color: #8b6444;
+    font-size: 1rem; cursor: pointer;
+    font-family: Georgia, serif; font-weight: bold;
+    transition: background 0.15s;
+  }
+  .btn-outline:hover { background: #f0e8da; }
+  .badge {
+    display: inline-block;
+    background: rgba(196,163,90,0.12);
+    border: 1px solid rgba(196,163,90,0.35);
+    border-radius: 8px; padding: 4px 12px;
+    color: #8b6914; font-size: 0.73rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .progress-wrap {
+    background: #f0e8da; border: 1px solid #d9c9b0;
+    border-radius: 4px; height: 5px; margin-bottom: 18px; overflow: hidden;
+  }
+  .progress-bar {
+    background: linear-gradient(90deg, #c4a35a, #c4962e);
+    height: 100%; border-radius: 4px; transition: width 0.4s;
+  }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .score-right { display: flex; gap: 14px; align-items: center; }
+  .kombo-badge {
+    background: rgba(196,150,46,0.15); border: 1px solid rgba(196,150,46,0.4);
+    border-radius: 8px; padding: 3px 10px; color: #c4962e; font-size: 0.82rem;
+  }
+  .dogru-s { color: #4a7c59; font-weight: bold; }
+  .yanlis-s { color: #9b4444; font-weight: bold; }
+  .soru-text { font-size: 1.07rem; line-height: 1.8; margin-bottom: 20px; color: #3d2b1f; font-weight: 600; }
+  .siklar { display: flex; flex-direction: column; gap: 9px; }
+  .sik-btn {
+    width: 100%; text-align: left; border-radius: 12px;
+    padding: 13px 16px; display: flex; align-items: flex-start; gap: 12px;
+    font-family: Georgia, serif; font-size: 0.97rem; cursor: pointer;
+    transition: background 0.18s, border-color 0.18s;
+    background: #fffdf9; border: 1.5px solid #d9c9b0; color: #5c3d1e;
+    line-height: 1.5;
+  }
+  .sik-btn:hover:not(:disabled) { background: #f0e8da; }
+  .sik-btn:disabled { cursor: default; }
+  .sik-btn.dogru { background: #eaf4ed !important; border-color: #4a7c59 !important; color: #4a7c59 !important; }
+  .sik-btn.yanlis { background: #faeaea !important; border-color: #9b4444 !important; color: #9b4444 !important; }
+  .sik-circle {
+    min-width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 0.85rem; flex-shrink: 0;
+    background: rgba(196,163,90,0.18); color: #8b6914;
+  }
+  .sik-circle.dogru { background: #4a7c59 !important; color: white !important; }
+  .sik-circle.yanlis { background: #9b4444 !important; color: white !important; }
+  .aciklama {
+    margin-top: 3px; margin-left: 10px;
+    padding: 9px 13px;
+    background: #f0e8da;
+    border-left: 3px solid #d9c9b0;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.86rem; color: #8b6444; line-height: 1.55;
+  }
+  .aciklama.dogru { background: #eaf4ed; border-color: #4a7c59; }
+  .ozet-box {
+    margin-top: 18px; padding: 14px 16px;
+    background: rgba(196,163,90,0.08);
+    border: 1px solid rgba(196,163,90,0.25);
+    border-radius: 12px; font-size: 0.9rem; color: #8b6444; line-height: 1.65;
+  }
+  .sonraki-wrap { margin-top: 20px; text-align: center; }
+  .hata-box {
+    background: #faeaea; border: 1px solid #9b4444; border-radius: 12px;
+    padding: 14px 18px; margin-bottom: 20px; color: #9b4444; font-size: 0.9rem;
+  }
+  .sonuc-skor { padding: 18px 8px; background: #f0e8da; border: 1px solid #d9c9b0; border-radius: 12px; text-align: center; }
+  .skor-sayi { font-size: 2rem; font-weight: bold; margin-bottom: 4px; }
+  .skor-label { color: #8b6444; font-size: 0.88rem; }
+  .kombo-info {
+    background: rgba(196,150,46,0.1); border: 1px solid rgba(196,150,46,0.3);
+    border-radius: 10px; padding: 10px; margin-bottom: 18px; color: #c4962e;
+    text-align: center;
+  }
+  .gecmis-list { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 7px; margin-bottom: 22px; }
+  .gecmis-item {
+    display: flex; align-items: flex-start; gap: 9px;
+    padding: 9px 12px; border-radius: 8px; font-size: 0.84rem;
+  }
+  .gecmis-item.d { background: #eaf4ed; }
+  .gecmis-item.y { background: #faeaea; }
+  .yukl-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 12px; }
+  .dots { display: flex; gap: 8px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #c4a35a; animation: bounce 1.3s ease infinite; }
+  .dot:nth-child(2) { animation-delay: 0.22s; }
+  .dot:nth-child(3) { animation-delay: 0.44s; }
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-14px)} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { font-size: 2.5rem; animation: spin 2s linear infinite; }
+  hr { border: none; border-top: 1px solid #d9c9b0; margin: 20px 0; }
+  p { line-height: 1.75; }
+</style>
+</head>
+<body>
+<div class="app" id="root"></div>
+
+<script>
+// ========== VERİ TABANI ==========
+const KAYNAK = {
+  tanzimat1: { donem: "Tanzimat 1. Dönem (1839-1876)", yazarlar: {
+    "İbrahim Şinasi": {
+      ozellikler: ["Tanzimat edebiyatının kurucusu","İlkler şairidir","Roman ve öykü yazmamıştır","İlk özel gazete Tercüman-ı Ahval'i Agah Efendi ile çıkardı","La Fontaine'den çeviri yaptı","Klasisizm akımından etkilendi","Batılı anlamda ilk tiyatronun yazarı","Divan nesrini yıkmıştır"],
+      ilkleri: ["Batılı anlamda ilk tiyatro: Şair Evlenmesi (1859)","İlk özel gazete: Tercüman-ı Ahval","İlk atasözleri derlemesi: Durub-u Emsal-i Osmaniye","İlk makale: Tercüman-ı Ahval Mukaddimesi"],
+      eserler: { şiir:["Müntehabat-ı Eş'ar"], tiyatro:["Şair Evlenmesi"], derleme:["Durub-u Emsal-i Osmaniye"], çeviri:["Tercüme-i Manzume"] }
+    },
+    "Namık Kemal": {
+      ozellikler: ["Vatan şairi lakabı vardır","Adalet, hak, hukuk kavramlarını kullanır","Aruz ölçüsü kullandı","İlk edebi roman: İntibah","Romantizm akımından etkilendi","İlk tarihi roman: Cezmi","Şiirde Hürriyet kavramını ilk kullanan","Toplum için sanat anlayışı"],
+      eserler: { roman:["İntibah","Cezmi"], tiyatro:["Vatan yahut Silistre","Celalettin Herzemşah","Akif Bey","Zavallı Çocuk","Gülnihal","Kara Bela"], şiir:["Hürriyet Kasidesi","Vaveyla","Vatan Şarkısı","Vatan Türküsü","Murabba"], eleştiri:["Tahrib-i Harabat","Takip","Renan Müdafaanamesi"], tarih:["Devr-i İstila","Evrak-ı Perişan","Silistre Muhasarası"] }
+    },
+    "Ahmet Mithat Efendi": {
+      ozellikler: ["Yazı Makinesi ve Hace-i Evvel lakabıyla bilinir","Halk için roman anlayışı","1. dönemin en üretken yazarı","Anlatıyı sık kestiğinden eserleri kusurlu sayılır","İlk polisiye roman: Esrar-ı Cinayât","Avrupa'da Bir Cevelan ilk gezi yazısıdır","Romantizm akımından etkilendi","Servetifünuncuları Dekadanlar dedi"],
+      eserler: { roman:["Felatun Bey ile Rakım Efendi","Jön Türkler","Paris'te Bir Türk","Hasan Mellah","Hüseyin Fellah","Dünyaya İkinci Geliş","Yeniçeriler","Esrar-ı Cinayât"], öykü:["Kıssadan Hisse","Letaif-i Rivayat"], tiyatro:["Çengi","Çerkez Özdenler","Açıkbaş","Eyvah"], gezi:["Avrupa'da Bir Cevelan"], anı:["Menfa"] }
+    },
+    "Şemsettin Sami": {
+      ozellikler: ["Tercüman-ı Şark ve Sabah gazetelerini çıkardı","İlk ansiklopedi: Kamusu'l-Âlâm","Taaşşuk-ı Talat ve Fitnat ilk yerli romandır","Robinson Crusoe ve Sefiller'i çevirdi","Dil bilginidir"],
+      eserler: { roman:["Taaşşuk-ı Talat ve Fitnat (İLK YERLİ ROMAN)"], sözlük:["Kamus-ı Türkî","Kamus-ı Arabî","Kamus-ı Fransevî"], tiyatro:["Seydi Yahya","Besa yahut Ahde Vefa","Gave"], çeviri:["Sefiller","Robinson Crusoe"], ansiklopedi:["Kamusu'l Âlâm"] }
+    },
+    "Ziya Paşa": {
+      ozellikler: ["Eleştiriyle ön plana çıktı","Terkibibent ve terciibentleriyle bilinir","Roman yazmamıştır","Eserlerinde ikilik ve tezat var","Şiir ve İnşa'da halk; Harabat'ta divan şiirini övdü (çelişki)"],
+      eserler: { eleştiri:["Zafername (Ali Paşa hicvi)"], şiir:["Eş'ar-ı Ziya","Terkibibent","Terciibent"], anı:["Defter-i Âmâl"], çeviri:["Emile","Engizisyon Tarihi","Endülüs Tarihi"], antoloji:["Harabat"] }
+    },
+    "Ahmet Vefik Paşa": {
+      ozellikler: ["Moliere'den çeviri ve adaptelerle tanınır","İlk Türk tiyatro binasını kurdu","Lehçe-i Osmanî ile ilk Anadolu Türkçesi sözlüğü","İlk adapte tiyatroyu yazdı"],
+      eserler: { sözlük:["Lehçe-i Osmanî"], tarih:["Şecere-i Türkî","Fezleke-i Tarih-i Osmanî","Hikmet-i Tarih"], tiyatro:["Tabibi Aşk","Zoraki Tabip","Kocalar Mektebi","Tartüf","Kadınlar Mektebî","İnfial-i Aşk"] }
+    }
+  }},
+  tanzimat2: { donem: "Tanzimat 2. Dönem (1876-1896)", yazarlar: {
+    "Recaizade Mahmut Ekrem": {
+      ozellikler: ["Üstat olarak anılır","Güzel olan her şey şiirin konusu olabilir","İlk realist roman: Araba Sevdası","Servetifünun döneminin başlatıcısıdır","Kulak için kafiyeyi savunur","Sanat için sanat anlayışı"],
+      eserler: { roman:["Araba Sevdası"], öykü:["Şemsa","Muhsin Bey"], şiir:["Nağme-i Seher","Yadigâr-ı Şebap","Pejmürde","Zemzeme I-II-III","Nijad Ekrem","Nefrin"], tiyatro:["Afife Anjelik","Atala","Vuslat yahut Süreksiz Sevinç","Çok Bilen Çok Yanılır"], eleştiri:["Takdir-i Elhan","Zemzeme III Mukaddimesi"] }
+    },
+    "Abdülhak Hamit Tarhan": {
+      ozellikler: ["Şair-i Azam lakabıyla tanınır","İlk pastoral şiir: Sahra","İlk uyaksız şiir: Validem","Makber ile metafizik düşünceyi getirdi","Tezatlar şairi olarak da bilinir","Aruzla yazılan ilk manzum piyes: Eşber"],
+      eserler: { şiir:["Garam","Ölü","Makber","Sahra","Hacle","Divaneliklerim yahut Belde","Bunlar Odur","Validem","Bâlâdan Bir Ses"], tiyatro:["Eşber","Nesteren","Liberte","İlhan","Tezer","Sardanapal","Cünun-u Aşk"] }
+    }
+  }},
+  servetifunun: { donem: "Servetifünun Edebiyatı (1896-1901)", yazarlar: {
+    "Tevfik Fikret": {
+      ozellikler: ["İlk şiir kitabı Rübab-ı Şikeste'dir","'Sis' şiiriyle İstanbul'u kötülüklerin kaynağı gösterir","Parnasizm'i savunur; anjambman kavramını ortaya attı","Mehmet Akif ile Tarih-i Kadim tartışması meşhurdur","Aruz kullandı; Şermin'i heceyle yazdı","Serbest müstezatı başarıyla uyguladı"],
+      eserler: { şiir:["Rübab-ı Şikeste","Tarih-i Kadim","Rübab'ın Cevabı","Şermin","Haluk'un Defteri"] }
+    },
+    "Cenap Şahabettin": {
+      ozellikler: ["Parnasizm ve sembolizm etkisinde","Serbest müstezatı geliştirdi","Tüm şiirlerinde aruz kullandı","İlhan-ı Şita önemli şiiridir","Bireysel temalar işledi"],
+      eserler: { şiir:["Tâmât","Terane-i Mehtap","Seçme Şiirleri","Bütün Şiirleri"], gezi:["Hac Yolunda","Afak-ı Irak","Avrupa Mektupları","Suriye Mektupları"], tiyatro:["Körebe","Küçük Beyler","Yalan"], özdeyiş:["Tiryaki Sözleri"] }
+    },
+    "Halit Ziya Uşaklıgil": {
+      ozellikler: ["Aşk-ı Memnu ve Mai ve Siyah ilk modern romanlarımız sayılır","Mensur şiirin ilk örnekleri: Mezardan Sesler","Realizm-natüralizm etkisindedir","Hikayelerinin dili romanlarına göre daha sadedir"],
+      eserler: { roman:["Aşk-ı Memnu","Mai ve Siyah","Nemide","Bir Ölünün Defteri","Kırık Hayatlar","Sefile","Ferdi ve Şürekası"], öykü:["Solgun Demet","Hepsinden Acı","Kadın Pençesi","Bir Yazın Tarihi"], tiyatro:["Kâbus","Fare","Fürûzan"], anı:["Kırk Yıl","Saray ve Ötesi","Bir Acı Hikâye"], mensurşiir:["Mezardan Sesler"] }
+    },
+    "Mehmet Rauf": {
+      ozellikler: ["İlk psikolojik roman: Eylül","Halit Ziya etkisi yoğundur","Aşk-sevgi temalarını işler","Mensur şiirleri: Siyah İnciler önemlidir"],
+      eserler: { roman:["Eylül","Ferda-yı Garam","Karanfil ve Yasemin","Genç Kız Kalbi","Böğürtlen","Halas","Menekşe","Son Yıldız"], hikaye:["Son Emel","Aşıkâne","İntizar","Kadın İsterse","Hanımlar Arasında"], mensurşiir:["Siyah İnciler"], tiyatro:["Pençe","Cidal","Sansar"] }
+    },
+    "Hüseyin Cahit Yalçın": {
+      ozellikler: ["Edebiyat ve Hukuk makalesiyle Servetifünun dönemi kapanır","Kavgalarım adlı eleştirisi önemlidir"],
+      eserler: { roman:["Hayal İçinde","Nadide"], öykü:["Hayat-ı Muhayyel"] }
+    }
+  }},
+  milliEdebiyat: { donem: "Millî Edebiyat (1911-1923)", yazarlar: {
+    "Ömer Seyfettin": {
+      ozellikler: ["Olay öyküsünün en büyük temsilcisi (Maupassant tarzı)","Küçük hikayeyi bağımsız tür hâline getirdi","Yeni Lisan makalesiyle Millî edebiyata yön verdi","Üslubunda yabancı sözcüklere yer vermedi"],
+      eserler: { öykü:["Kızıl Elma Neresi?","Ant","Kaşağı","Forsa","Diyet","Perili Köşk","Yalnız Efe","Yüksek Ökçeler","Üç Nasihat","Gizli Mabed","Bahar ve Kelebekler","Bomba","Beyaz Lale","Pembe İncili Kaftan"], roman:["Ashab-ı Kehfimiz","Efruz Bey"] }
+    },
+    "Ziya Gökalp": {
+      ozellikler: ["Türkçülüğün Esasları ile Türkçülüğü sistemleştirdi","İlk Türk sosyologtur","Kızıl Elma, Altın Işık, Yeni Hayat şiir kitapları","Lirizmden uzak didaktik şiirler yazdı"],
+      eserler: { şiir:["Kızıl Elma","Yeni Hayat","Altın Işık"], düzyazı:["Türkleşmek İslamlaşmak Muasırlaşmak","Türkçülüğün Esasları","Türk Töresi","Türk Ahlakı","Doğru Yol","Limni ve Malta Mektupları","Türk Medeniyet Tarihi"] }
+    },
+    "Mehmet Emin Yurdakul": {
+      ozellikler: ["Türk Şairi ve Millî Şair lakabıyla tanınır","Tüm şiirlerini hece ölçüsüyle yazdı","İlk şiiri 'Cenge Giderken' ile tanındı","Toplum için sanat anlayışı"],
+      eserler: { şiir:["Türkçe Şiirler","Türk Sazı","Ey Türk Uyan","Tan Sesleri","Ordunun Destanı","Turana Doğru","Zafer Yolunda"] }
+    },
+    "Yakup Kadri Karaosmanoğlu": {
+      ozellikler: ["Güçlü realizm","Nehir roman anlayışı","Yaban, Ankara, Kiralık Konak önemli eserleri","Kadro dergisinde halkçı yazar","Fecriati'den Millî edebiyata geçti","Neo-klasisizm savundu"],
+      eserler: { roman:["Yaban","Ankara","Kiralık Konak","Nur Baba","Hep O Şarkı","Sodom ve Gomore","Bir Sürgün","Panorama I-II","Hüküm Gecesi"], öykü:["Bir Serencam","Millî Savaş Hikâyeleri","Rahmet"], anı:["Zoraki Diplomat","Politikada 45 Yıl","Anamın Kitabı","Gençlik ve Edebiyat Hatıraları","Vatan Yolunda"], mensurşiir:["Erenlerin Bağından","Okun Ucundan"] }
+    },
+    "Reşat Nuri Güntekin": {
+      ozellikler: ["Diyalogları canlı, dili sade","Ahlaki yapı ve yanlış Batılılaşma temel konuları"],
+      eserler: { roman:["Çalıkuşu","Gizli El","Damga","Dudaktan Kalbe","Akşam Güneşi","Bir Kadın Düşmanı","Acımak","Yeşil Gece","Değirmen","Miskinler Tekkesi","Kavak Yelleri","Son Sığınak"], öykü:["Tanrı Misafiri","Roçild Bey","Eski Ahbap","Olağan İşler"], gezi:["Anadolu Notları"] }
+    },
+    "Halide Edip Adıvar": {
+      ozellikler: ["Toplum ve töre romanlarıyla bilinir","Halide Onbaşı adıyla da anıldı","Türkçülük ve milliyetçilik anlayışını savundu","İlk dönem bireysel, sonra toplumsal konular"],
+      eserler: { roman:["Handan","Seviye Talip","Ateşten Gömlek","Vurun Kahpeye","Tatarcık","Yol Palas Cinayeti","Yeni Turan","Sinekli Bakkal","Kalp Ağrısı","Döner Ayna","Raik'in Annesi","Zeyno'nun Oğlu"], öykü:["Harap Mabetler","Dağa Çıkan Kurt"], tiyatro:["Kenan Çobanları","Maske ve Ruh"], anı:["Türk'ün Ateşle İmtihanı","Mor Salkımlı Ev"] }
+    },
+    "Refik Halit Karay": {
+      ozellikler: ["Kalem dergisinde KİRPİ takma adıyla yazdı","İlk romanı İstanbul'un İç Yüzü","Realizm-natüralizm etkisi var","Merak unsuruna sıkça yer verdi"],
+      eserler: { roman:["Yezidin Kızı","Sürgün","Nilgün","Çete","İstanbul'un İç Yüzü","Kadınlar Tekkesi"], öykü:["Gurbet Hikâyeleri","Memleket Hikâyeleri"], hiciv:["Kirpi'nin Dedikleri","Guguklu Saat"], anı:["Minelbab İlelmihrab","Bir Ömür Boyunca"] }
+    },
+    "Mehmet Akif Ersoy": {
+      ozellikler: ["İslamcılığı benimseyen şair","Sırat-ı Müstakim ve Sebilü'r-reşad dergilerinde yazdı","1921'de İstiklal Marşı'yla yarışmada birinci oldu","Safahat 7 bölümden oluşur","Lirik-epik özellikli şiirler yazdı"],
+      eserler: { safahat:["1. Safahat","2. Süleymaniye Kürsüsünde","3. Hakkın Sesleri","4. Fatih Kürsüsünde","5. Hatıralar","6. Asım","7. Gölgeler"] }
+    }
+  }},
+  bagımsızlar: { donem: "Bağımsızlar / Geçiş Dönemi", yazarlar: {
+    "Ahmet Haşim": {
+      ozellikler: ["Sembolizm akımını benimser","Göl Saatleri ve Piyale önemli şiir kitapları","Şiir Hakkında Bazı Mülahazalar adlı yazısında sanatını açıklar","Anlam kapalılığı, musiki ve imge ön plandadır","Şiirleri aruzdadır"],
+      eserler: { şiir:["Göl Saatleri","Piyale"], düzyazı:["Gurebahane-i Laklakan","Bize Göre","Frankfurt Seyahatnamesi"] }
+    },
+    "Yahya Kemal Beyatlı": {
+      ozellikler: ["Neo-klasik anlayış","Eski şiiri modern teknikle birleştirdi","Hiçbir kitabını ölümünden önce yayımlamadı","Saf şiir anlayışı","Aruz ölçüsüyle yazdı"],
+      eserler: { şiir:["Kendi Gök Kubbemiz","Eski Şiirin Rüzgarıyla","Rubailer ve Hayyam Rubailerini Türkçe Söyleyiş"], düzyazı:["Aziz İstanbul","Eğil Dağlar","Siyasi ve Edebî Portreler"] }
+    }
+  }},
+  cumhuriyet: { donem: "Cumhuriyet Edebiyatı (1923 sonrası)", yazarlar: {
+    "Necip Fazıl Kısakürek": {
+      ozellikler: ["Mistik Şair olarak bilinir","İlk şiiri Örümcek Ağı'dır","Ağaç ve Büyük Doğu dergilerini çıkardı","Tiyatroları önemlidir"],
+      eserler: { şiir:["Çile","Kaldırımlar","Örümcek Ağı","Ben ve Ötesi","Sonsuzluk Kervanı"], roman:["Aynadaki Yalan"], otobiyografi:["Kafa Kâğıdı"], tiyatro:["Künye","Tohum","Bir Adam Yaratmak","Reis Bey","Nam-ı Diğer Parmaksız Salih","Siyah Pelerinli Adam"] }
+    },
+    "Behçet Necatigil": {
+      ozellikler: ["Evler Şairi olarak bilinir","Varlık dergisinde ilk şiirlerini yayımladı","Lirizm ön plandadır","Radyo oyunları yazmıştır"],
+      eserler: { şiir:["Kapalı Çarşı","Evler","Çevre","Eski Toprak","Sevgilerde"], radyooyunu:["Yıldızlara Bakmak","Pencere","Üç Turunçlar"], derleme:["Edebiyatımızda İsimler Sözlüğü"] }
+    },
+    "Fazıl Hüsnü Dağlarca": {
+      ozellikler: ["Çocuk şiirleri ön plandadır","Cezayir Türküsü, Çocuk ve Allah önemli şiirleri"],
+      eserler: { şiir:["Havaya Çizilen Dünya","Çocuk ve Allah","Daha","Çakırın Destanı","Üç Şehitler Destanı","Kuş Ayak","İstanbul Fetih Destanı","Yedi Memetler","Çukurova Koçaklaması"] }
+    },
+    "Ahmet Hamdi Tanpınar": {
+      ozellikler: ["Sembolizm akımı etkisinde","Zaman ve medeniyet problemleri temel konusu","Roman ve şiirde modernist anlayış","Yahya Kemal'in öğrencisidir","Beş Şehir önemli deneme kitabı"],
+      eserler: { roman:["Huzur","Saatleri Ayarlama Enstitüsü","Sahnenin Dışındakiler","Mahur Beste","Aydaki Kadın"], şiir:["Şiirler"], deneme:["Beş Şehir","Yaşadığım Gibi"], hikaye:["Yaz Yağmuru","Abdullah Efendinin Rüyaları"] }
+    }
+  }},
+  besHececiler: { donem: "Beş Hececiler", yazarlar: {
+    "Faruk Nafız Çamlıbel": { ozellikler:["Beş Hececilerin önderi","Han Duvarları en önemli şiiri","11'li hece kullandı"], eserler:{ şiir:["Han Duvarları","Çoban Çeşmesi","Gönülden Gönüle"] } },
+    "Orhan Seyfi Orhon": { ozellikler:["Beş Hececilerden","Memleket ve yurt sevgisi işledi"], eserler:{ şiir:["Fırtına ve Kar","Peri Kızı ile Çoban"] } },
+    "Yusuf Ziya Ortaç": { ozellikler:["Beş Hececilerden"], eserler:{ şiir:["Akından Akına","Cenk Ufukları"] } },
+    "Halit Fahri Ozansoy": { ozellikler:["Beş Hececilerden"], eserler:{ şiir:["Sulara Dalan Gözler","Efsaneler"] } },
+    "Enis Behiç Koryürek": { ozellikler:["Beş Hececilerden","Milli duygular işledi"], eserler:{ şiir:["Miras","Güneşin Ölümü"] } }
+  }}
+};
+
+function tumYazarlar() {
+  const liste = [];
+  for (const d of Object.values(KAYNAK)) {
+    if (!d.yazarlar) continue;
+    for (const [yazar, bilgi] of Object.entries(d.yazarlar)) {
+      liste.push({ yazar, bilgi, donem: d.donem });
+    }
+  }
+  return liste;
+}
+const YAZARLAR = tumYazarlar();
+
+function rastgele(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+const SISTEM = `Sen AYT Edebiyat sınav sorusu üreten bir uzmansın. Sana verilen yazar/dönem bilgisinden gerçek AYT formatında ZOR ve ALDATICI tek soru üreteceksin.
+
+Soru tipleri (çeşitli tiplerden üret):
+1. Yazar özellikleri/ipuçları verilir → Bu yazarın hangi eseri aşağıdakilerden hangisidir?
+2. Eser adları verilir → Bunların yazarı kimdir?
+3. Bir yazarın özellikleri verilir → Aşağıdakilerden hangisi YANLIŞTIR?
+4. Dönem/akım özellikleri → Bu dönemde hangi yazar yer almaz?
+5. Lakap/takma ad → Bu kim?
+6. İlk olan eser/olay → Kim yazmıştır?
+7. Yazarın bir eseri bağlamında bilgi testi
+
+ALDATICI ŞIKLAR KURALI: Yanlış şıklar mutlaka aynı dönemden veya benzer akımdan başka yazarların gerçek eserleri olsun.
+
+Yanıtı SADECE aşağıdaki JSON formatında ver, başka hiçbir şey yazma:
+{"soru":"...","tip":"...","A":"...","B":"...","C":"...","D":"...","E":"...","cevap":"A","aciklamalar":{"A":"...","B":"...","C":"...","D":"...","E":"..."},"ozet":"..."}`;
+
+async function soruUret() {
+  const ana = rastgele(YAZARLAR);
+  const d1 = rastgele(YAZARLAR);
+  const d2 = rastgele(YAZARLAR);
+  const d3 = rastgele(YAZARLAR);
+  const icerik = `ANA YAZAR: ${ana.yazar}\nDÖNEM: ${ana.donem}\nÖZELLİKLER: ${ana.bilgi.ozellikler?.join(" | ")}\nESERLERİ: ${JSON.stringify(ana.bilgi.eserler)}\nİLKLERİ: ${JSON.stringify(ana.bilgi.ilkleri||[])}\n\nALDATICI ŞIK MALZEMELERİ:\n- ${d1.yazar} (${d1.donem}) eserleri: ${Object.values(d1.bilgi.eserler||{}).flat().slice(0,5).join(", ")}\n- ${d2.yazar} (${d2.donem}) eserleri: ${Object.values(d2.bilgi.eserler||{}).flat().slice(0,5).join(", ")}\n- ${d3.yazar} (${d3.donem}) eserleri: ${Object.values(d3.bilgi.eserler||{}).flat().slice(0,5).join(", ")}\n\nZorlu, aldatıcı AYT sorusu üret.`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: SISTEM + "\n\n" + icerik }]
+    })
+  });
+  if (!res.ok) throw new Error("API " + res.status + ": " + (await res.text()).slice(0,200));
+  const data = await res.json();
+  const raw = data.content?.[0]?.text || "";
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error("JSON bulunamadı");
+  return JSON.parse(match[0]);
+}
+
+// ========== STATE ==========
+let state = {
+  ekran: "ana", sorular: [], mevcut: 0,
+  secilen: null, cevaplandi: false,
+  puan: 0, yanlis: 0, gecmis: [],
+  kombo: 0, maxKombo: 0, toplamHedef: 20,
+  yukl: false, soruYukl: false, hata: "",
+  arkaplan: [], arkaplanYukl: false
+};
+
+function setState(partial) {
+  state = { ...state, ...partial };
+  render();
+}
+
+async function arkaplanDoldur() {
+  if (state.arkaplanYukl || state.arkaplan.length >= 4) return;
+  setState({ arkaplanYukl: true });
+  try {
+    const s = await soruUret();
+    state.arkaplan.push(s);
+  } catch(e) {}
+  setState({ arkaplanYukl: false });
+}
+
+async function quizBaslat(adet) {
+  setState({ ekran:"yukl", hata:"", puan:0, yanlis:0, mevcut:0, gecmis:[], kombo:0, maxKombo:0, toplamHedef:adet, sorular:[], arkaplan:[], yukl:true });
+  try {
+    const ilkler = await Promise.all([soruUret(), soruUret(), soruUret()]);
+    setState({ sorular: ilkler.slice(0, Math.min(3,adet)), ekran:"quiz", secilen:null, cevaplandi:false, yukl:false });
+    setTimeout(() => arkaplanDoldur(), 600);
+  } catch(e) {
+    setState({ hata:"Hata: " + e.message + " — Lütfen tekrar deneyin.", ekran:"ana", yukl:false });
+  }
+}
+
+async function sonraki() {
+  const yeniIdx = state.mevcut + 1;
+  if (yeniIdx >= state.toplamHedef) { setState({ ekran:"sonuc" }); return; }
+  if (state.arkaplan.length > 0) {
+    const s = state.arkaplan.shift();
+    const sorular = [...state.sorular]; sorular[yeniIdx] = s;
+    setState({ sorular, mevcut:yeniIdx, secilen:null, cevaplandi:false });
+    setTimeout(() => arkaplanDoldur(), 200);
+  } else {
+    setState({ soruYukl: true });
+    try {
+      const s = await soruUret();
+      const sorular = [...state.sorular]; sorular[yeniIdx] = s;
+      setState({ sorular, mevcut:yeniIdx, secilen:null, cevaplandi:false, soruYukl:false });
+    } catch(e) { setState({ hata:"Soru yüklenemedi.", soruYukl:false }); }
+  }
+}
+
+function sikSec(sik) {
+  if (state.cevaplandi) return;
+  const soruObj = state.sorular[state.mevcut];
+  const dogru = soruObj?.cevap === sik;
+  const gecmis = [...state.gecmis, { soru: soruObj?.soru, secilen: sik, dogru: soruObj?.cevap, dogruMu: dogru }];
+  let { puan, yanlis, kombo, maxKombo } = state;
+  if (dogru) { puan++; kombo++; if (kombo > maxKombo) maxKombo = kombo; }
+  else { yanlis++; kombo = 0; }
+  setState({ secilen:sik, cevaplandi:true, puan, yanlis, kombo, maxKombo, gecmis });
+}
+
+// ========== RENDER ==========
+function el(tag, attrs, ...children) {
+  const e = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs||{})) {
+    if (k === 'className') e.className = v;
+    else if (k === 'onClick') e.addEventListener('click', v);
+    else if (k === 'disabled') e.disabled = v;
+    else if (k === 'style') Object.assign(e.style, v);
+    else if (k === 'innerHTML') e.innerHTML = v;
+    else e.setAttribute(k, v);
+  }
+  for (const c of children) {
+    if (c == null) continue;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  }
+  return e;
+}
+
+function render() {
+  const root = document.getElementById('root');
+  root.innerHTML = '';
+  root.className = 'app';
+
+  const { ekran, sorular, mevcut, secilen, cevaplandi, puan, yanlis, gecmis, kombo, maxKombo, toplamHedef, soruYukl, hata, arkaplan } = state;
+
+  // --- ANA ---
+  if (ekran === 'ana') {
+    const wrap = el('div', {className:'wrap center'});
+    wrap.appendChild(el('div', {style:{fontSize:'3rem',marginBottom:'10px'}}, '📜'));
+    wrap.appendChild(el('h1', {}, 'AYT Edebiyat'));
+    wrap.appendChild(el('p', {className:'subtitle'}, 'Yapay Zeka Destekli Sınav Hazırlık'));
+    if (hata) wrap.appendChild(el('div', {className:'hata-box'}, '⚠️ ' + hata));
+
+    const kart = el('div', {className:'card'});
+    kart.appendChild(el('h2', {style:{color:'#3d2b1f',marginBottom:'10px',fontSize:'1.3rem'}}, 'Nasıl Çalışır?'));
+    kart.appendChild(el('p', {style:{color:'#8b6444',marginBottom:'20px',fontSize:'0.97rem'}},
+      'Rüştü Hoca\'nın AYT Edebiyat notlarındaki tüm yazarlar, dönemler ve eserler üzerine yapay zeka her seferinde farklı ve gerçek AYT formatında sorular üretir. Yanlış her şık ayrı ayrı açıklanır.'));
+
+    const grid = el('div', {className:'grid2'});
+    [['🖋','Tanzimat 1. ve 2. Dönem'],['📖','Servetifünun Edebiyatı'],['🌿','Millî Edebiyat Dönemi'],['🏛','Cumhuriyet Edebiyatı']].forEach(([i,k]) => {
+      grid.appendChild(el('div', {className:'mini-card'}, el('span',{style:{fontSize:'1.2rem'}},i), k));
+    });
+    kart.appendChild(grid);
+    kart.appendChild(el('hr', {}));
+    kart.appendChild(el('p', {style:{color:'#8b6444',marginBottom:'14px',textAlign:'center'}}, 'Kaç soru çözmek istiyorsun?'));
+    const btnG = el('div', {className:'btn-group'});
+    [10,20,30,50].forEach(n => {
+      btnG.appendChild(el('button', {className:'btn-gold', onClick:()=>quizBaslat(n)}, n+' Soru'));
+    });
+    kart.appendChild(btnG);
+    wrap.appendChild(kart);
+    root.appendChild(wrap);
+    return;
+  }
+
+  // --- YÜKLEME ---
+  if (ekran === 'yukl') {
+    const w = el('div', {className:'yukl-wrap'});
+    w.appendChild(el('div', {className:'spinner'}, '⚗️'));
+    w.appendChild(el('p', {style:{color:'#8b6914',fontWeight:'bold',fontSize:'1.1rem'}}, 'Sorular hazırlanıyor…'));
+    w.appendChild(el('p', {style:{color:'#8b6444',fontSize:'0.9rem'}}, 'Yapay zeka AYT soruları üretiyor'));
+    const dots = el('div', {className:'dots'});
+    [0,1,2].forEach(i => { const d = el('div',{className:'dot'}); d.style.animationDelay=i*0.22+'s'; dots.appendChild(d); });
+    w.appendChild(dots);
+    root.appendChild(w);
+    return;
+  }
+
+  // --- QUIZ ---
+  if (ekran === 'quiz') {
+    if (soruYukl || !sorular[mevcut]) {
+      const w = el('div',{className:'yukl-wrap'});
+      w.appendChild(el('p',{style:{color:'#8b6914'}},'Soru yükleniyor…'));
+      root.appendChild(w); return;
+    }
+    const soruObj = sorular[mevcut];
+    const yuzde = Math.round((mevcut/toplamHedef)*100);
+    const wrap = el('div',{className:'wrap'});
+
+    // Üst bar
+    const topbar = el('div',{className:'topbar'});
+    topbar.appendChild(el('span',{style:{color:'#3d2b1f',fontWeight:'bold'}}, (mevcut+1)+' / '+toplamHedef));
+    const sR = el('div',{className:'score-right'});
+    if (kombo >= 2) sR.appendChild(el('span',{className:'kombo-badge'}, '🔥 '+kombo+' kombo'));
+    sR.appendChild(el('span',{className:'dogru-s'}, '✓ '+puan));
+    sR.appendChild(el('span',{className:'yanlis-s'}, '✗ '+yanlis));
+    topbar.appendChild(sR);
+    wrap.appendChild(topbar);
+
+    // Progress
+    const pw = el('div',{className:'progress-wrap'});
+    const pb = el('div',{className:'progress-bar'});
+    pb.style.width = yuzde+'%';
+    pw.appendChild(pb); wrap.appendChild(pw);
+
+    // Kart
+    const kart = el('div',{className:'card'});
+    kart.appendChild(el('div',{className:'badge'}, (soruObj.tip||'SORU').toUpperCase().replace(/_/g,' ')));
+    kart.appendChild(el('p',{className:'soru-text'}, soruObj.soru));
+
+    const sikDiv = el('div',{className:'siklar'});
+    ['A','B','C','D','E'].forEach(sik => {
+      const secildi = secilen === sik;
+      const dogruMu = cevaplandi ? (sik === soruObj.cevap ? true : secildi ? false : null) : null;
+
+      const btn = el('button', {
+        className: 'sik-btn' + (dogruMu===true?' dogru':dogruMu===false?' yanlis':''),
+        disabled: cevaplandi,
+        onClick: () => sikSec(sik)
+      });
+      const circle = el('span', {className:'sik-circle'+(dogruMu===true?' dogru':dogruMu===false?' yanlis':'')}, sik);
+      btn.appendChild(circle);
+      btn.appendChild(el('span',{},soruObj[sik]||''));
+      if (cevaplandi && sik === soruObj.cevap) btn.appendChild(el('span',{style:{marginLeft:'auto',color:'#4a7c59',flexShrink:'0'}},'✓'));
+      if (cevaplandi && secildi && sik !== soruObj.cevap) btn.appendChild(el('span',{style:{marginLeft:'auto',color:'#9b4444',flexShrink:'0'}},'✗'));
+      sikDiv.appendChild(btn);
+
+      if (cevaplandi && soruObj.aciklamalar?.[sik]) {
+        sikDiv.appendChild(el('div',{className:'aciklama'+(sik===soruObj.cevap?' dogru':'')}, soruObj.aciklamalar[sik]));
+      }
+    });
+    kart.appendChild(sikDiv);
+
+    if (cevaplandi && soruObj.ozet) {
+      kart.appendChild(el('div',{className:'ozet-box'}, el('strong',{style:{color:'#8b6914'}},'📖 '), soruObj.ozet));
+    }
+    if (cevaplandi) {
+      const sw = el('div',{className:'sonraki-wrap'});
+      sw.appendChild(el('button',{className:'btn-gold',onClick:sonraki}, mevcut+1>=toplamHedef?'Sonuçları Gör →':'Sonraki Soru →'));
+      kart.appendChild(sw);
+    }
+    wrap.appendChild(kart);
+    root.appendChild(wrap);
+    return;
+  }
+
+  // --- SONUÇ ---
+  if (ekran === 'sonuc') {
+    const yuzd = Math.round((puan/toplamHedef)*100);
+    const [emoji, mesaj] = yuzd>=90?['🏆','Mükemmel! AYT\'ye hazırsın.']:yuzd>=75?['🌟','Harika gidiyorsun!']:yuzd>=55?['📚','İyi, ama eksiklerin var.']:['💪','Biraz daha çalışmak gerek.'];
+    const wrap = el('div',{className:'wrap center'});
+    wrap.appendChild(el('div',{style:{fontSize:'3rem',marginBottom:'10px'}},emoji));
+    wrap.appendChild(el('h1',{style:{marginBottom:'6px'}},'Sınav Bitti!'));
+    wrap.appendChild(el('p',{style:{color:'#8b6914',fontSize:'1.1rem',marginBottom:'28px'}},mesaj));
+    const kart = el('div',{className:'card'});
+    const grid = el('div',{className:'grid3'});
+    [['Doğru',puan,'#4a7c59'],['Yanlış',yanlis,'#9b4444'],['Başarı','%'+yuzd,'#8b6914']].forEach(([l,d,r])=>{
+      const sc = el('div',{className:'sonuc-skor'});
+      sc.appendChild(el('div',{className:'skor-sayi',style:{color:r}},String(d)));
+      sc.appendChild(el('div',{className:'skor-label'},l));
+      grid.appendChild(sc);
+    });
+    kart.appendChild(grid);
+    if (maxKombo >= 3) kart.appendChild(el('div',{className:'kombo-info'},'🔥 En uzun kombon: ',el('strong',{},String(maxKombo)),' ardışık doğru!'));
+    const gl = el('div',{className:'gecmis-list'});
+    gecmis.forEach(c => {
+      const item = el('div',{className:'gecmis-item '+(c.dogruMu?'d':'y')});
+      item.appendChild(el('span',{style:{color:c.dogruMu?'#4a7c59':'#9b4444',flexShrink:'0'}},c.dogruMu?'✓':'✗'));
+      const info = el('div',{});
+      info.appendChild(el('div',{style:{color:'#5c3d1e'}},(c.soru||'').substring(0,85)+'…'));
+      if (!c.dogruMu) { const d=el('div',{style:{color:'#8b6444',marginTop:'2px'}},'Doğru: '); d.appendChild(el('strong',{style:{color:'#4a7c59'}},c.dogru)); info.appendChild(d); }
+      item.appendChild(info);
+      gl.appendChild(item);
+    });
+    kart.appendChild(gl);
+    const bg = el('div',{className:'btn-group'});
+    bg.appendChild(el('button',{className:'btn-gold',onClick:()=>quizBaslat(toplamHedef)},'🔄 Tekrar Dene'));
+    bg.appendChild(el('button',{className:'btn-outline',onClick:()=>setState({ekran:'ana'})},'Ana Menü'));
+    kart.appendChild(bg);
+    wrap.appendChild(kart);
+    root.appendChild(wrap);
+    return;
+  }
+}
+
+render();
+</script>
+</body>
+</html>
