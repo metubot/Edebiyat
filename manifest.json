@@ -1,0 +1,13 @@
+{
+  "name": "AYT Edebiyat Quiz",
+  "short_name": "AYT Quiz",
+  "description": "AYT Edebiyat Sınav Hazırlık",
+  "icons": [
+    {"src": "icon.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon.png", "sizes": "512x512", "type": "image/png"}
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fdf8f2",
+  "theme_color": "#f5ece0"
+}
